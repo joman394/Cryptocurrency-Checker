@@ -1,0 +1,37 @@
+$realEstateRTP = Invoke-RestMethod -URI 'https://www.alphavantage.co/query?function=SECTOR&apikey=4T2EMFD2UQF4NH3B'
+
+write-host "The Real-Time Performance for the Real Estate sector is " $realEstateRTP.'Rank A: Real-Time Performance'.'Real Estate'
+
+$bitcoin = Invoke-RestMethod -URI 'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=BTC&market=USD&apikey=4T2EMFD2UQF4NH3B'
+$litecoin = Invoke-RestMethod -URI 'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=LTC&market=USD&apikey=4T2EMFD2UQF4NH3B'
+$monero = Invoke-RestMethod -URI 'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=XMR&market=USD&apikey=4T2EMFD2UQF4NH3B'
+
+$bitcoinPrice = [math]::Round($bitcoin.'Time Series (Digital Currency Daily)'."$date".'4a. close (USD)',2)
+$litecoinPrice = [math]::Round($litecoin.'Time Series (Digital Currency Daily)'."$date".'4a. close (USD)',2)
+$moneroPrice = [math]::Round($monero.'Time Series (Digital Currency Daily)'."$date".'4a. close (USD)',2)
+
+$date = Get-Date -format "yyyy-MM-dd"
+
+write-host "BTC Price at end of market $date : $" $bitcoinPrice
+write-host "LTC Price at end of market $date : $" $litecoinPrice
+write-host "XMR Price at end of market $date : $" $moneroPrice
+
+$userStock = Read-Host -Prompt 'Enter the choice for your stock'
+
+$userStockTicker = Invoke-RestMethod -URI "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=$($userStock)&outputsize=full&apikey=4T2EMFD2UQF4NH3B"
+
+write-host "Your chosen stock of " $userStock " has a daily price of $" ([math]::Round($userStockTicker.'Time Series (Daily)'."$date".'4. close',2)) " as of $date"
+
+$prevDay = (Get-Date).AddDays(-1).ToString('yyyy-MM-dd')
+
+$gainLoss = [math]::Round($userStockTicker.'Time Series (Daily)'."$date".'4. close' - $userStockTicker.'Time Series (Daily)'."$prevDay".'4. close',2)
+
+if ($gainLoss -gt 0){
+write-Host "You've made a profit of $" $gainLoss "! Way to go!"
+}
+
+if ($gainLoss -lt 0){
+$gainLoss = $($gainLoss)*-1
+
+write-host "You've lost $" $gainLoss "! Sorry!"
+}
